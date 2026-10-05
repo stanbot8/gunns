@@ -1,64 +1,15 @@
-name: Unit Tests (ASan)
-
-# For more info and troubleshooting help for this workflow, see the Continuous Integration
-# page in the GUNNS Wiki.
-
+name: CI input verification
 on:
-  push:
-    branches:
-    - master
-    paths-ignore:
-    - README.md
-    - draw/**
-    - bin/utils/simbus_icd_input_gen/**
-    - .github/workflows/**
-    - '!.github/workflows/unit_test_asan.yml'
-  pull_request:
   workflow_dispatch:
-
+    inputs:
+      probe:
+        type: string
+        required: true
 jobs:
-  all_unit_tests:
+  check:
     runs-on: ubuntu-latest
-    container: docker://oraclelinux:8
-
     steps:
-    - name: Update package manager
-      run: |
-        yum install -y yum-utils
-        dnf config-manager --set-enabled ol8_codeready_builder
-        yum repolist
-        yum install -y epel-release && yum update -y
-
-    - name: Install dependencies
-      run: |-
-        yum install -y tcsh make gcc gcc-c++ cppunit cppunit-devel lcov valgrind libasan python3
-
-
-    - name: Checkout repository
-      uses: actions/checkout@master
-
-      with:
-        ref: ${{ (github.event_name == 'schedule' || github.event_name == 
-          'workflow_run') && 'b633c7617d26eb41f6e0ab85f0dfb055761d4a47' || 
-          github.sha }}
-    - name: Run tests
-      run: |
-        # Set environment variables
-        export GUNNS_HOME=`pwd`
-        export MS_UTILS_HOME="${GUNNS_HOME}/ms-utils"
-        export TS_MODELS_HOME="${GUNNS_HOME}/gunns-ts-models"
-        # Some unit tests can fail unless parallel make, probably a missing dependency
-        # in the UT makefiles...
-        export MAKEFLAGS="-j4"
-        # Set file permissions needed by the parsing test
-        chmod a-r ms-utils/parsing/test/file_no_permission.txt
-        chmod a-r ms-utils/parsing/test/nopermission
-        # Make & run unit tests
-        cd test
-        ./make_all_ut_asan.sh
-        # Scan results for pass/fail
-        chmod +x scan_all_ut_asan.py
-        python3 ./scan_all_ut_asan.py
+    - run: echo 'Changed inputs reached the consumer'
     needs:
     - alpha_bridge_inputs
     if: ${{ (success()) && needs.alpha_bridge_inputs.outputs.changed == 'true' 
@@ -82,15 +33,12 @@ jobs:
         GH_TOKEN: ${{ github.token }}
         AB_REPOSITORY: ${{ github.repository }}
         AB_RUN_ID: ${{ github.run_id }}
-        AB_HEAD_SHA: ${{ (github.event_name == 'schedule' || github.event_name 
-          == 'workflow_run') && 'b633c7617d26eb41f6e0ab85f0dfb055761d4a47' || 
-          github.sha }}
-        AB_REF: ${{ (github.event_name == 'schedule' || github.event_name == 
-          'workflow_run') && 'refs/heads/master' || github.ref }}
+        AB_HEAD_SHA: ${{ github.sha }}
+        AB_REF: ${{ github.ref }}
         AB_WORKFLOW_DIGEST: 
-          49d8d0752e75c4e30f9b7e88cdece51ee2eeebded57fd7f14f2374430bd3d03f
-        AB_EVENT: ${{ github.event_name }}
-        AB_SCHEDULE: ${{ github.event.schedule || '' }}
+          538b9a5f4a645070b988c8cc2bc361fe5412e9e5bb5ea5f9f39b3e269164c9cb
+        AB_EVENT: schedule
+        AB_SCHEDULE: alpha-bridge verification
         AB_VARIABLES: ${{ toJSON(vars) }}
         AB_INPUTS: ${{ toJSON(inputs) }}
         AB_WORKFLOW_RUN: ${{ toJSON(github.event.workflow_run) }}

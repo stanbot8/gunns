@@ -1,0 +1,29 @@
+{
+  "definition_blob_sha1": {
+    ".github/workflows/alpha-bridge-ci-verify.yml": "d19efeb3bd029beb4c50fd874010d2b930d20715",
+    ".github/workflows/lib_deps.yml": "f76ff12364587c48755cbb27cf68fcc9019b63df",
+    ".github/workflows/sim_test.yml": "cf22d9ca4919418faa44499da550b82e16820fe7",
+    ".github/workflows/unit_test.yml": "7468aa2cfba76dcc986eb5b6f7c4c8616ccc2a94",
+    ".github/workflows/unit_test_asan.yml": "204e8016d6213eaa176e507f887ad1b3c6b9d895"
+  },
+  "definition_sha256": {
+    ".github/workflows/alpha-bridge-ci-verify.yml": "8fde9e2f5e1b37bbbb22794427ac6d217d8b18bc857606edd0b072e89c58b436",
+    ".github/workflows/lib_deps.yml": "fe4805b9cb4322ae7a022a719d5cbc96130a2750f048d82e6712de16eecb2262",
+    ".github/workflows/sim_test.yml": "5ee908f36447985bb4c92164e8ecbf7ea36ae21ea292fdc15cca4b15c9ad3c19",
+    ".github/workflows/unit_test.yml": "522c6d3099b070529dd5bec6bf25eb86a5d0735d27212e835ee7ef1624deab67",
+    ".github/workflows/unit_test_asan.yml": "37881549085aee79392f1ec49458323e291edec2c16da40be8ff7a1fc5abb53c"
+  },
+  "generator_sha256": "f9d11fba5b604bac754f7ab7e40ccde549adf8e029da2ca91ed14e9ab94c0775",
+  "schema": "alpha-bridge/fork-ci",
+  "source_branch": "master",
+  "source_commit": "b633c7617d26eb41f6e0ab85f0dfb055761d4a47",
+  "source_repository": "nasa/gunns",
+  "version": 1,
+  "workflows": [
+    ".github/workflows/alpha-bridge-ci-verify.yml",
+    ".github/workflows/lib_deps.yml",
+    ".github/workflows/sim_test.yml",
+    ".github/workflows/unit_test.yml",
+    ".github/workflows/unit_test_asan.yml"
+  ]
+}
