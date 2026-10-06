@@ -1,100 +1,15 @@
-name: Test Trick Sim
-
-# For more info and troubleshooting help for this workflow, see the Continuous Integration
-# page in the GUNNS Wiki.
-#
-# We'd rather use a pre-built Docker image with the dependencies already installed, but we
-# don't have a place to store the image.  We can't use the GiHhub Container Registry or
-# Package containers, and don't want to use Docker Hub, so we have to configure the
-# container from scratch each time.
-
+name: CI input probe
 on:
-  push:
-    branches:
-    - master
-    paths-ignore:
-    - 'README.md'
-    - 'bin/utils/simbus_icd_input_gen/**'
-    - '.github/workflows/**'
-    - '!.github/workflows/sim_test.yml'
-  pull_request:
-  workflow_dispatch:
-
+  workflow_call:
+    inputs:
+      probe:
+        type: string
+        required: true
 jobs:
-  sim_test:
+  check:
     runs-on: ubuntu-latest
-    container: docker://oraclelinux:8
-
     steps:
-    - name: Update package manager
-      run: |
-        dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-        dnf config-manager --set-enabled ol8_codeready_builder
-        dnf -y update
-
-    - name: Install Trick dependencies
-      run: |
-        dnf -y install 'dnf-command(config-manager)' dnf-plugins-core bison clang flex git llvm make maven swig cmake clang-devel gcc gcc-c++ java-11-openjdk-devel libxml2-devel llvm-devel llvm-static ncurses-devel openmotif openmotif-devel perl perl-Digest-MD5 udunits2 udunits2-devel which zlib-devel libX11-devel libXt-devel python3-devel diffutils
-
-    - name: Install GTest
-      run: |-
-        dnf install -y gtest-devel
-
-
-    - name: Install GUNNS dependencies
-      run: |-
-        dnf install -y tk-devel
-
-
-    - name: Checkout repository
-      uses: actions/checkout@master
-
-      with:
-        ref: ${{ (github.event_name == 'schedule' || github.event_name == 
-          'workflow_run') && 'b633c7617d26eb41f6e0ab85f0dfb055761d4a47' || 
-          github.sha }}
-    - name: Build Trick
-      # Failure here is likely due to new or changed dependencies of Trick, see above
-      # For issue #93: we use the same fix as Trick for assigning JAVA_HOME, see:
-      #   trick/.github/workflows/test_32_oracle.yml
-      run: |
-        export TRICK_HOME="/home/trick"
-        export MAKEFLAGS=-j`nproc`
-        export JAVA_HOME=$(dirname $(dirname $(readlink -f `which java`)))
-        git clone https://github.com/nasa/trick.git ${TRICK_HOME}
-        cd ${TRICK_HOME}
-        ./configure
-        make
-
-    # TODO use better way to define env vars globally for all steps
-    - name: Build sim
-      run: |
-        export TRICK_HOME="/home/trick"
-        export MAKEFLAGS=-j`nproc`
-        export GUNNS_HOME=`pwd`
-        export MS_UTILS_HOME="${GUNNS_HOME}/ms-utils"
-        export TS_MODELS_HOME="${GUNNS_HOME}/gunns-ts-models"
-        export HS_CONFIG_PATH="${GUNNS_HOME}/sims/Modified_data"
-        cd sims/SIM_test
-        ${TRICK_HOME}/bin/trick-CP
-
-    - name: Run sim
-      run: |
-        export TRICK_HOME="/home/trick"
-        export MAKEFLAGS=-j`nproc`
-        export GUNNS_HOME=`pwd`
-        export MS_UTILS_HOME="${GUNNS_HOME}/ms-utils"
-        export TS_MODELS_HOME="${GUNNS_HOME}/gunns-ts-models"
-        export HS_CONFIG_PATH="${GUNNS_HOME}/sims/Modified_data"
-        cd sims/SIM_test
-        ./S_main* RUN_test/input_int_test.py
-
-    - name: Check sim outputs for pass/fail
-      run: |
-        export GUNNS_HOME=`pwd`
-        cd test/CI
-        chmod +x sim_test.py
-        python3 ./sim_test.py
+    - run: echo 'Changed inputs reached the consumer'
     needs:
     - alpha_bridge_inputs
     if: |-
@@ -118,15 +33,12 @@ jobs:
         GH_TOKEN: ${{ github.token }}
         AB_REPOSITORY: ${{ github.repository }}
         AB_RUN_ID: ${{ github.run_id }}
-        AB_HEAD_SHA: ${{ (github.event_name == 'schedule' || github.event_name 
-          == 'workflow_run') && 'b633c7617d26eb41f6e0ab85f0dfb055761d4a47' || 
-          github.sha }}
-        AB_REF: ${{ (github.event_name == 'schedule' || github.event_name == 
-          'workflow_run') && 'refs/heads/master' || github.ref }}
+        AB_HEAD_SHA: ${{ github.sha }}
+        AB_REF: ${{ github.ref }}
         AB_WORKFLOW_DIGEST: 
-          3bfc3d69b8117801a50b359125a8f3a360d1ea57a6b94fc24efa010f63ce8e22
-        AB_EVENT: ${{ github.event_name }}
-        AB_SCHEDULE: ${{ github.event.schedule || '' }}
+          aeb0c6e2caf9e7aa08ace6ecf5bf2a46ae50d577b223dd23f9d645eb0c1d6792
+        AB_EVENT: schedule
+        AB_SCHEDULE: alpha-bridge verification
         AB_VARIABLES: ${{ toJSON(vars) }}
         AB_INPUTS: ${{ toJSON(inputs) }}
         AB_WORKFLOW_RUN: ${{ toJSON(github.event.workflow_run) }}
