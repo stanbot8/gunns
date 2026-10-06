@@ -13,9 +13,9 @@ on:
     branches:
     - master
     paths-ignore:
-    - README.md
-    - bin/utils/simbus_icd_input_gen/**
-    - .github/workflows/**
+    - 'README.md'
+    - 'bin/utils/simbus_icd_input_gen/**'
+    - '.github/workflows/**'
     - '!.github/workflows/sim_test.yml'
   pull_request:
   workflow_dispatch:
@@ -97,8 +97,8 @@ jobs:
         python3 ./sim_test.py
     needs:
     - alpha_bridge_inputs
-    if: ${{ (success()) && needs.alpha_bridge_inputs.outputs.changed == 'true' 
-      }}
+    if: |-
+      ${{ (success()) && needs.alpha_bridge_inputs.outputs.changed == 'true' }}
   alpha_bridge_inputs:
     name: CI input check
     runs-on: ubuntu-latest
@@ -124,7 +124,7 @@ jobs:
         AB_REF: ${{ (github.event_name == 'schedule' || github.event_name == 
           'workflow_run') && 'refs/heads/master' || github.ref }}
         AB_WORKFLOW_DIGEST: 
-          39294e0f9fdaefab941283e862d47791142213f265fb8368ac33202c8776b983
+          c420f9a7acc29c4ae7ec7d8cd1f505f320c7941d857964781b4a1de5b5145362
         AB_EVENT: ${{ github.event_name }}
         AB_SCHEDULE: ${{ github.event.schedule || '' }}
         AB_VARIABLES: ${{ toJSON(vars) }}
